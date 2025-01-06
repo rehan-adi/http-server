@@ -11,17 +11,26 @@ const server = createServer((socket) => {
 
   // Handle the 'data' when the server receives data from the client
   socket.on("data", (clientData) => {
-    const { method, path, headers } = parseRequest(clientData);
+    try {
+      const { method, path, headers } = parseRequest(clientData);
+      console.log(`Received request: ${method} ${path}`);
+      console.log("Headers:", headers);
 
-    console.log(`Received request: ${method} ${path}`);
-    console.log("Headers:", headers);
-
-    // create response and send the response to the client
-    const response = createResponse();
-    socket.write(response);
-
-    // End the connection after sending the response
-    socket.end();
+      const response = createResponse();
+      socket.write(response);
+    } catch (error: any) {
+      console.error(error.message);
+      const errorResponse = [
+        `HTTP/1.1 405 Method Not Allowed`,
+        `Content-Type: text/plain`,
+        `Content-Length: ${Buffer.byteLength(error.message)}`,
+        "",
+        error.message,
+      ].join("\r\n");
+      socket.write(errorResponse);
+    } finally {
+      socket.end();
+    }
   });
 
   socket.on("end", () => {
