@@ -17,8 +17,6 @@ export function parseRequest(data: Buffer) {
     const [key, value] = lines[i].split(": ");
     if (key && value) {
       headers[key] = value;
-    } else {
-      throw new Error("400 Bad Request: Malformed Header");
     }
   }
 
