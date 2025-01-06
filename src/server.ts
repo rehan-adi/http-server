@@ -1,4 +1,8 @@
 import { createServer } from "net";
+import { parseRequest } from "./utils/parseRequest";
+import { createResponse } from "./utils/createResponse";
+
+const port = 1111;
 
 // Create a TCP server that listens for incoming connections
 const server = createServer((socket) => {
@@ -7,8 +11,14 @@ const server = createServer((socket) => {
 
   // Handle the 'data' when the server receives data from the client
   socket.on("data", (clientData) => {
-    console.log(clientData.toString());
-    socket.write("Message recived\n");
+    const { method, path, headers } = parseRequest(clientData);
+
+    console.log(`Received request: ${method} ${path}`);
+    console.log("Headers:", headers);
+
+    // create response and send the response to the client
+    const response = createResponse();
+    socket.write(response);
 
     // End the connection after sending the response
     socket.end();
@@ -19,6 +29,6 @@ const server = createServer((socket) => {
   });
 });
 
-server.listen(1111, () => {
-  console.log("Server is running on 1111");
+server.listen(port, () => {
+  console.log("Server is running");
 });
